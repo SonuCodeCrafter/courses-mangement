@@ -2,13 +2,13 @@ from pymongo import MongoClient
 from fastapi import Depends
 
 # Initialize MongoDB client
+connection_client = '' or 'mongodb://localhost:27017/'
 client = None
-
 
 def get_mongo_client():
     global client
     if not client:
-        client = MongoClient('mongodb://mongodb:27017/')
+        client = MongoClient(connection_client)
     return client
 
 

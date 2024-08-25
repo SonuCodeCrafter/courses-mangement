@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from pymongo import MongoClient, ASCENDING, DESCENDING, UpdateOne
 from app.models import Course, Chapter
-from app.routes import get_courses_collection
-
+from app.connections import get_courses_collection
+from app.utils import serialize_doc
 course_router = APIRouter()
 
 
@@ -11,12 +11,13 @@ def get_collection():
     return get_courses_collection()
 
 
-courses_collection = get_courses_collection()
+courses_collection = get_collection()
 
 
 # Endpoint to get a list of all available courses
 @course_router.get("/courses")
 def get_courses(sort_by: str = "name", domain: str = None):
+
     query = {}
     if domain:
         query['domain'] = domain
@@ -34,7 +35,9 @@ def get_courses(sort_by: str = "name", domain: str = None):
         raise HTTPException(status_code=400, detail="Invalid sort parameter")
 
     courses = list(courses_collection.find(query).sort(sort_field, order))
-    return courses
+    serialized_courses = [serialize_doc(course) for course in courses]
+
+    return serialized_courses
 
 
 # Endpoint to get the course overview
